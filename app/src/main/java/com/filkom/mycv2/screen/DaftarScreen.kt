@@ -5,25 +5,29 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.filkom.mycv2.viewmodel.DaftarViewModel
 
 @Composable
 fun DaftarScreen(
-    onSimpan: (nim: String, nama: String, email: String, alamat: String) -> Unit
+    onSimpan: (nim: String, nama: String, email: String, alamat: String) -> Unit,
+    viewModel: DaftarViewModel = viewModel()
 ) {
-    var nim by rememberSaveable { mutableStateOf("") }
-    var nama by rememberSaveable { mutableStateOf("") }
-    var email by rememberSaveable { mutableStateOf("") }
-    var alamat by rememberSaveable { mutableStateOf("") }
+    val state = viewModel.state
+
+    LaunchedEffect(state.isDaftarSuccess) {
+        if (state.isDaftarSuccess) {
+            onSimpan(state.nim, state.nama, state.email, state.alamat)
+            viewModel.resetDaftarSuccess()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -33,33 +37,48 @@ fun DaftarScreen(
         Text(text = "Form Daftar")
 
         OutlinedTextField(
-            value = nim,
-            onValueChange = { nim = it },
+            value = state.nim,
+            onValueChange = { viewModel.updateNim(it) },
             label = { Text("NIM") },
-            modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
+            modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+            enabled = !state.isLoading
         )
         OutlinedTextField(
-            value = nama,
-            onValueChange = { nama = it },
+            value = state.nama,
+            onValueChange = { viewModel.updateNama(it) },
             label = { Text("Nama") },
-            modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
+            modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+            enabled = !state.isLoading
         )
         OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
+            value = state.email,
+            onValueChange = { viewModel.updateEmail(it) },
             label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
+            modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+            enabled = !state.isLoading
         )
         OutlinedTextField(
-            value = alamat,
-            onValueChange = { alamat = it },
+            value = state.alamat,
+            onValueChange = { viewModel.updateAlamat(it) },
             label = { Text("Alamat") },
-            modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
+            modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+            enabled = !state.isLoading
         )
 
+        if (state.error != null) {
+            Text(
+                text = state.error,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        }
+
         Button(
-            onClick = { onSimpan(nim, nama, email, alamat) },
-            modifier = Modifier.padding(top = 20.dp)
-        ) { Text("SIMPAN") }
+            onClick = { viewModel.simpan() },
+            modifier = Modifier.padding(top = 20.dp),
+            enabled = !state.isLoading
+        ) {
+            Text(if (state.isLoading) "MENYIMPAN..." else "SIMPAN")
+        }
     }
 }

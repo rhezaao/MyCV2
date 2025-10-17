@@ -28,7 +28,7 @@ fun DetailScreen(
     ) {
         Text(text = "Detail", fontSize = 20.sp)
         Text(
-            text = "NIM: $nim\nNama: $nama\nEmail: ${if (email.isBlank()) "-" else email}\nAlamat: ${if (alamat.isBlank()) "-" else alamat}",
+            text = "NIM: $nim\nNama: $nama\nEmail: ${email.ifBlank { "-" }}\nAlamat: ${alamat.ifBlank { "-" }}",
             modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
             textAlign = TextAlign.Start
         )
